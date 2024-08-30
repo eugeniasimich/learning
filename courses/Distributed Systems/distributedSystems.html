@@ -1,0 +1,2280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2024-05-30 Thu 16:39 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Distributed Systems</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Eugenia Simich" />
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Distributed Systems</h1>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">These are notes on CSE138 course on distributed systems <sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup></td>
+</tr>
+</tbody>
+</table>
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org15d575c">Intro</a>
+<ul>
+<li><a href="#org0bcc1c6">Network models</a></li>
+</ul>
+</li>
+<li><a href="#org18396e2">Clocks</a>
+<ul>
+<li><a href="#org78ba821">Physical clocks: Monotonic vs time-of-day clocks.</a></li>
+<li><a href="#orgbda7660">Logical clocks</a></li>
+<li><a href="#org21ed892">State and events</a></li>
+<li><a href="#orgbcabfe5">Partial order</a></li>
+<li><a href="#orgc9619c8">Lamport clocks</a></li>
+<li><a href="#org500641e">Vector clocks</a></li>
+</ul>
+</li>
+<li><a href="#orgc92883c">Delivery</a>
+<ul>
+<li><a href="#org94cd1b5">FIFO delivery</a></li>
+<li><a href="#orgd275ee7">Causal delivery</a></li>
+<li><a href="#orgefca8e9">Totally-ordered delivery</a></li>
+<li><a href="#orgb35c2c5">Relation between the three delivery guarantees</a></li>
+</ul>
+</li>
+<li><a href="#org524b7aa">Snapshots of distributed system</a></li>
+<li><a href="#org5a1911a">Fault models</a>
+<ul>
+<li><a href="#orgf83486a">Safety and liveness</a></li>
+<li><a href="#org36d4496">Faults models</a></li>
+<li><a href="#org234df1e">Two generals problem</a></li>
+<li><a href="#org900cada">Forms of fault tolerance</a></li>
+</ul>
+</li>
+<li><a href="#org3a8617b">Replication</a>
+<ul>
+<li><a href="#org8ff9e84">Consistency models</a></li>
+</ul>
+</li>
+<li><a href="#org01906d8">Consensus</a>
+<ul>
+<li><a href="#org6b20f1c">Paxos</a></li>
+</ul>
+</li>
+<li><a href="#orgc92151d">Dynamo style DBs</a>
+<ul>
+<li><a href="#org44064c2">Passive vs Active replication</a></li>
+<li><a href="#org7dc62a0">CAP</a></li>
+<li><a href="#org4daceb2">Eventual consistency and strong convergence</a></li>
+<li><a href="#orgbc56626">Dealing with replicas that disagree</a></li>
+<li><a href="#orgc1577a8">Quorum consistency</a></li>
+<li><a href="#org5e3fa57">Tail latency</a></li>
+</ul>
+</li>
+<li><a href="#org1494cf2">Sharding</a></li>
+<li><a href="#orgd5d1787">MapReduce</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org15d575c" class="outline-2">
+<h2 id="org15d575c">Intro</h2>
+<div class="outline-text-2" id="text-org15d575c">
+<blockquote>
+<p>
+A distributed system is one in which the failure of a computer you didn’t even know existed can render your own computer unusable.  
+&#x2013; Leslie Lamport
+</p>
+</blockquote>
+
+
+<p>
+Definition of distributed systems: Partial failure + unbounded latency
+</p>
+
+<p>
+Why to deal with this?
+</p>
+<ul class="org-ul">
+<li>to make things faster, using more computers</li>
+<li>to have more data than what it can fit on one machine</li>
+<li>reliability (by redundancy, replicas)</li>
+<li>throughput (by proximity)</li>
+</ul>
+</div>
+
+<div id="outline-container-org0bcc1c6" class="outline-3">
+<h3 id="org0bcc1c6">Network models</h3>
+<div class="outline-text-3" id="text-org0bcc1c6">
+<ul class="org-ul">
+<li>Synchronous: A synch network is one where there exists an <code>n</code> such that no messages take longer than <code>n</code> units of time to be delivered.</li>
+<li>Asynchronous: An asynch network is one where there exists NO <code>n</code> such that no messages take longer than <code>n</code> units of time to be delivered.</li>
+</ul>
+
+<p>
+We will focus on asych, as it is the most realistic. 
+</p>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-org18396e2" class="outline-2">
+<h2 id="org18396e2">Clocks</h2>
+<div class="outline-text-2" id="text-org18396e2">
+</div>
+<div id="outline-container-org78ba821" class="outline-3">
+<h3 id="org78ba821">Physical clocks: Monotonic vs time-of-day clocks.</h3>
+<div class="outline-text-3" id="text-org78ba821">
+<ul class="org-ul">
+<li>Monotonic: always go forwads. Are meaningful only inside the machine (they are computed as milliseconds since you restarted the machine or something like that). Good for mesuring <i>durations</i>.</li>
+<li>Time-of-day: Are normally synched agains NTP (network time protocol). Can jump forward and backwards. Not very good for mesuring durations. Better for timestamps.</li>
+</ul>
+
+
+<pre class="example">
+   __         __ 
+  |m1| x=5   |m2| x=5 
+   |           |
+3pm| \________ |
+   |    x++   \| x=6
+   |           |
+   |       3pm |
+   |           |
+   v           v 
+</pre>
+<p>
+[Example 1] Example where neither of these physical clocks are useful
+</p>
+
+
+<p>
+As <code>m1</code> and <code>m2</code> have their clocks a little bit unsynchronized, if we asked them to take a snapshot at 3pm, then <code>m1</code> would have said <code>x=5</code> while <code>m2</code> would have said <code>x=6</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbda7660" class="outline-3">
+<h3 id="orgbda7660">Logical clocks</h3>
+<div class="outline-text-3" id="text-orgbda7660">
+<p>
+Only measures the order of events. 
+</p>
+
+<p>
+A-&gt;B : A happened before B
+</p>
+
+<p>
+This means:
+</p>
+<ul class="org-ul">
+<li>A could have caused B</li>
+<li>B could not have caused B</li>
+</ul>
+
+<p>
+Useful for debugging.
+</p>
+
+<p>
+We say that:
+</p>
+<ul class="org-ul">
+<li>Consistent with causality: <code>A-&gt;B</code> =&gt; Logical clock of <code>A</code> &lt; Logical clock of <code>B</code></li>
+<li>Characterizes causality: Logical clock of <code>A</code> &lt; Logical clock of <code>B</code> =&gt; <code>A-&gt;B</code></li>
+</ul>
+</div>
+
+<div id="outline-container-orgfedcc60" class="outline-4">
+<h4 id="orgfedcc60">Lamport diagrams</h4>
+<div class="outline-text-4" id="text-orgfedcc60">
+<p>
+Spacetime diagrams
+</p>
+
+<p>
+Given events <code>A</code> and <code>B</code>, we say <code>A-&gt;B</code> (<code>A</code> happens before <code>B</code>) if 
+</p>
+<ol class="org-ol">
+<li><code>A</code> and <code>B</code> happens in the same process line with <code>A</code> before <code>B</code>.</li>
+<li><code>A</code> is a send event and <code>B</code> is the corresponding recieve event.</li>
+<li>if <code>A-&gt;C</code> and <code>C-&gt;B</code> then <code>A-&gt;B</code> (transitivity)</li>
+</ol>
+
+<pre class="example">
+  __         __ 
+ |m1|       |m2|
+  |           |
+A |\_________ |
+  |          \|
+  |           | B
+  |           |
+D |           | C
+  v           v
+</pre>
+<p>
+[Example 2] 
+</p>
+
+<p>
+In the example, we know
+</p>
+<ol class="org-ol">
+<li><code>A-&gt;B</code> due to 2.</li>
+<li><code>B-&gt;C</code> due to 1.</li>
+<li><code>A-&gt;D</code> due to 1.</li>
+<li><code>A-&gt;C</code> due to our first two items and 3.</li>
+<li>Neither <code>B-&gt;D</code> or <code>D-&gt;B</code> are true. So we say <code>B</code> and <code>D</code> are concurrent: <code>B||D</code></li>
+</ol>
+</div>
+
+
+<ul class="org-ul">
+<li><a id="org02e6fa7"></a>Causal anomaly<br />
+<div class="outline-text-5" id="text-org02e6fa7">
+<p>
+Alice sends the message "Bob smells" to both Bob and Carol. Bob receives it first and answers "Fuck you Alice" to both Alice and Carol. Carol receives "Fuck you Alice" first and then "Bob Smells"
+</p>
+
+<pre class="example">
+	  _____         ___                _____
+	 |Alice|       |Bob|              |Carol|
+	    |              |                 |
+"Bob smells"|-------------&gt;|                 |
+	    |\             |                 |
+	    | \            |                 |
+	    |  \           | "Fuck you       |
+	    |   \          |  Alice"         |
+	    |    \        /|\---------------&gt;|
+	    |     \     _/ |                 |
+	    |      \---/--------------------&gt;|  ??
+	    |         /    |                 |
+	    |        /     |                 |
+	    | &lt;-----/      |                 |
+	    v              v                 v
+</pre>
+<p>
+[Example 3]
+</p>
+
+<p>
+This is known as <i>causal anomality</i>.
+</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+
+
+<div id="outline-container-org21ed892" class="outline-3">
+<h3 id="org21ed892">State and events</h3>
+<div class="outline-text-3" id="text-org21ed892">
+<p>
+We can look at the event log and reconstruct state. Not the other way around.
+</p>
+
+<pre class="example">
+      __         __ 
+     |m1|       |m2| x=5 
+      |            | A
+"set x|---------   |
+ to 6"|         \-&gt;| B  
+      |            | x=6    
+"set x|---------   |
+ to 7"|         \-&gt;| C  
+      |            | x=7    
+      v            v
+</pre>
+<p>
+[Example 4]
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">log</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">A    ??</td>
+</tr>
+
+<tr>
+<td class="org-left">B   set x to 6</td>
+</tr>
+
+<tr>
+<td class="org-left">C   set x to 7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-orgbcabfe5" class="outline-3">
+<h3 id="orgbcabfe5">Partial order</h3>
+<div class="outline-text-3" id="text-orgbcabfe5">
+<p>
+Is "<code>-&gt;</code>" relation a partial order. Almost. It lacks reflexivity. So it's an <i>irreflective partial order</i> (also know as <i>strict partial order</i>).
+</p>
+</div>
+</div>
+
+
+
+<div id="outline-container-orgc9619c8" class="outline-3">
+<h3 id="orgc9619c8">Lamport clocks</h3>
+<div class="outline-text-3" id="text-orgc9619c8">
+<p>
+The lamport clock of an event <code>A</code> (written <code>LC(A)</code>
+</p>
+
+<p>
+"clock condition": if <code>A-&gt;B</code> then <code>LC(A) &lt; LC(B)</code> (consistent with causality)
+</p>
+
+<p>
+Lamport clock algoritm:
+</p>
+
+<ol class="org-ol">
+<li>Every process keeps a counter</li>
+<li>On each event on a process, the counter is incremented.</li>
+<li>When sending a message, the sender includes it's counter in the message.</li>
+<li>When receiveing a message, the receiver sets its counter to be <code>max(local_counter, received_counter) + 1</code></li>
+</ol>
+
+<p>
+We can note that following these rules, <code>LC(A)&lt;LC(B)</code> does not imply <code>A-&gt;B</code> so lamport clocks are consistent with causality but do not characterize causality.
+</p>
+
+<p>
+But, by contrapositive: <code>!(LC(A)&lt;LC(B)) =&gt; ! A-&gt;B</code>, in other words <code>LC(A) &gt;= LC(B) =&gt;  A||B</code>
+</p>
+
+<p>
+There's a logical clock with both characteristics..
+</p>
+</div>
+</div>
+
+<div id="outline-container-org500641e" class="outline-3">
+<h3 id="org500641e">Vector clocks</h3>
+<div class="outline-text-3" id="text-org500641e">
+<ol class="org-ol">
+<li>Every process keeps a vector of integers initialized at 0s. This vector has dimension <code>n</code>, for <code>n</code> processes.</li>
+<li>On every event, a process increments its position in its vector clock.</li>
+<li>When sending a message, the sender includes its vector clock in the message (after the increment from step 2., because sends are events.)</li>
+<li>When receiving a message, the receiver will update its vector clock to <code>max(local_vector, received_vector)</code> and increment its own position, because receive is an event. We define <code>max</code> to be the pointwise max.</li>
+</ol>
+
+
+
+<pre class="example">
+       _____           ___                _____
+      |Alice|         |Bob|              |Carol|
+[0,0,0]  |       [0,0,0]  |         [0,0,0] |
+	 |                |                 |
+	 |                |                 |
+	 |                |     ----------- + [0,0,1]
+	 |        [0,1,1] +&lt;---/            |
+	 |                |                 |
+	 |     -----------+ [0,2,1]         |
+[1,2,1]  +&lt;---/           |                 |
+	 |                |                 |             
+	 |        [0,3,1] +\-------------   |
+	 |                |              \-&gt;+ [0,3,2]
+	 |                |                 |
+[2,2,1]  +-------------   |                 |
+	 |             \-&gt;+ [2,4,1]         |
+	 |                |                 + [0,3,3]
+	 |                +- [2,5,1]       /|
+	 |                | \__________   / |
+	 |                |            \-/-&gt;+ [2,5,4] 
+	 |                |             /   |
+[3,3,3]  +&lt;----------------------------/    |
+	 |                |              __/+ [2,5,5] 
+[4,5,5]  +&lt;-----------------------------/   |
+	 |                |                 |
+	 v                v                 v
+</pre>
+<p>
+[Example 5]
+</p>
+
+<p>
+Each event has a <i>logical clock</i> assigned, a <i>vector clock</i>. 
+</p>
+
+<p>
+An there's a characteristic that we can notice:  <code>A-&gt;B &lt;=&gt; VC(A) &lt; VC(B)</code>
+</p>
+
+<p>
+Given any event, there's a set of events whose vector clocks are <i>smaller</i>, some events whose vector clocks are <i>higher</i>, using point-wise comparision. There are also events not comparable using this comparison function.
+</p>
+
+<p>
+For example, if we pick event <code>[2,4,1]</code>, there is a set of events that have smaller vector clocks (<code>[0,0,1]</code>, <code>[0,1,1]</code>, ect)
+and some that are higher (<code>[2,5,5]</code>, <code>[2,5,4]</code>, etc) and some not comparable (<code>[0,3,3]</code>, <code>[3,3,3]</code>, etc)
+</p>
+
+<p>
+Events whose vector clocks are not comparable, are concurrent, <i>causally independent</i>.
+</p>
+
+<p>
+If we want to know the <i>happen-before</i> relashionship, we can just compare vectors.
+</p>
+
+
+<dl class="org-dl">
+<dt>Protocol</dt><dd>Set of rules that processes use to communicate to each other.</dd>
+</dl>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc92883c" class="outline-2">
+<h2 id="orgc92883c">Delivery</h2>
+<div class="outline-text-2" id="text-orgc92883c">
+</div>
+<div id="outline-container-org94cd1b5" class="outline-3">
+<h3 id="org94cd1b5">FIFO delivery</h3>
+<div class="outline-text-3" id="text-org94cd1b5">
+<p>
+Ensures that the order in which messages are sent by a process is the same as the order in which they are delivered by other processes.
+</p>
+
+<dl class="org-dl">
+<dt>FIFO delivery</dt><dd>If a process sends message <code>m2</code> after message <code>m1</code>, any process delivering both, delivers <code>m1</code> first.</dd>
+</dl>
+
+<p>
+Sending: Something a process DO.
+Receiving: Something that HAPPENS to a process .
+Delivering: Something a process CAN DO with a message it receives. (Messages can be queued up and deliver posponed)
+</p>
+
+<pre class="example">
+ __          __ 
+|A|          |B|
+ |            |
+ |\___m1_     |
+ |-------\---&gt;|
+ |  m2    \   | 
+ |         \-&gt;|
+ |            | 
+ v            v
+</pre>
+<p>
+[Example 6] 
+</p>
+
+<p>
+<i>Example 6 violates FIFO delivery</i>
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">FIFO delivery is already part of TCP</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+FIFO delivery can be implemented with sequence numbers: Messages are tagged with <code>(senderID, sequenceNbr)</code>
+</p>
+
+<p>
+Senders increment the sequence number after each send. If a received message has a SN equal to previously seen SN plus one, then deliver.
+</p>
+
+<p>
+FIFO delivery only works well if <i>reliable delivery is guaranteed</i>. (TCP has both)
+</p>
+
+
+
+<pre class="example">
+ __          __ 
+|A|          |B|
+ |            |
+ |\___m1_     |
+ |       \---&gt;|
+ |            |
+ |  ack   ----|
+ |&lt;------/    |
+ |            |
+ |\___m2_     |
+ |       \---&gt;|
+ |            |
+ |  ack   ----|
+ |&lt;------/    |
+ v            v
+</pre>
+<p>
+[Example 7] 
+</p>
+
+<p>
+A way of ensuring FIFO. Of couse this is slower.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd275ee7" class="outline-3">
+<h3 id="orgd275ee7">Causal delivery</h3>
+<div class="outline-text-3" id="text-orgd275ee7">
+<p>
+Ensures that messages with a causal relationship (i.e., one message happens before another) are delivered in the same order as they were sent.
+</p>
+
+<dl class="org-dl">
+<dt>Causal delivery</dt><dd>If <code>m1</code>'s send happens before <code>ms</code>'s send, then <code>m1</code>'s delivery must happen before <code>m2</code>'s delivery.</dd>
+</dl>
+
+<p>
+<i>Example 6 of FIFO delivery violation, also violates causal delivery.</i>
+</p>
+
+<p>
+<i>Example 3 (Bob smells, FU Alice) violates causal delivery but not FIFO delivery</i>. Why? Because FIFO is about messages being sent <i>from the same sender</i>.
+</p>
+
+<p>
+We can enforce causal delivery by using vector clocks
+</p>
+</div>
+
+<div id="outline-container-org335afc4" class="outline-4">
+<h4 id="org335afc4">Causal broadcast</h4>
+<div class="outline-text-4" id="text-org335afc4">
+<p>
+Causal broadcast is an algorithm that ensures causal delivery in a setting where all messages are broadcast messages.
+</p>
+
+<p>
+We want to define a deliverability condition that will indicate whether a message has to be delivere or not upon receival.
+</p>
+
+<p>
+The algorithm chosen is vector clock (with no receive increase). The deliverability condition will be tied to the vector contained in the message metaata. A message <code>m</code> is deliverable at a process <code>p</code> if
+</p>
+
+
+\begin{align*}               
+VC(m)[k] &= VC(p)[k] + 1 & \mbox{ if $k$ is the sender} \\
+VC(m)[k] &\leq VC(p)[k]     & \mbox{ otherwise}
+\end{align*}
+
+<p>
+Where \(VC(m)\) is the vector clock comming the message, an \(VC(p)\) is the vector clock currently stored in the process.
+</p>
+
+<p>
+Let's observe this in the example 3, but using vector clocks
+</p>
+
+<pre class="example">
+	_             _                  _
+       |A|           |B|                |C|
+[0,0,0] |      [0,0,0] |         [0,0,0] |
+	|              |                 |
+[1,0,0] |-------------&gt;| [1,0,0]         |
+	|\             |                 |
+	| \            |                 |
+	|  \           |                 |
+	|   \          |  [1,1,0]        |
+	|    \        /|\---------------&gt;| X
+	|     \     _/ |                 |
+	|      \---/--------------------&gt;| Y 
+	|         /    |    [1,0,0]      |
+	|        /     |                 |
+	| &lt;-----/      |                 |
+	v              v                 v
+</pre>
+<p>
+[Example 8]
+</p>
+
+<p>
+At point <code>X</code>, process <code>C</code> receives the vector clock <code>[1,1,0]</code>. It's own vector clock, at this point is <code>[0,0,0]</code>, so 
+the second condition is violated. \(VC(m)[0] = 1 \nleq 0\). So <code>C</code> shouldn't deliver the first message. Instead, it can be queued.
+</p>
+
+<p>
+At point <code>Y</code>, process <code>C</code> receives the vector clock <code>[1,0,0]</code>. In this case both conditions are met and the message can be delivered. <code>c</code>'s vector clock now changes to be <code>[1,0,0]</code>. So now the message queued can also be delivered.
+</p>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-orgefca8e9" class="outline-3">
+<h3 id="orgefca8e9">Totally-ordered delivery</h3>
+<div class="outline-text-3" id="text-orgefca8e9">
+<p>
+Ensures that messages are delivered in the same order on all processes. 
+</p>
+
+<dl class="org-dl">
+<dt>Totally-ordered delivery</dt><dd>If a proccess <i>delivers</i> <code>m1</code> and then <code>m2</code>, then all processes <i>delivering</i> both should deliver <code>m1</code> first.</dd>
+</dl>
+
+<pre class="example">
+ _            _          _            _
+|A|          |B|        |C|          |D|
+ |            |          |            |
+ |____m1_     |          |      _m2___|
+ |  \    \---&gt;|          |&lt;----/    / |
+ |   \        |     m1   |         /  |
+ |    \-----------------&gt;|        /   |
+ |            |          |    m2 /    |
+ |            |&lt;----------------/     |
+ |            |          |            |
+ v            v          v            v
+</pre>
+<p>
+[Example 9] 
+</p>
+
+<p>
+<code>B</code> delivers <code>m1</code> first and then <code>m2</code>, <code>C</code> delivers <code>m2</code> first and then <code>m1</code>. So there's a violation of totally-ordered delivery.
+</p>
+
+<p>
+Use case scenario: Imagine <code>B</code> and <code>C</code> being replicas of a data base.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgb35c2c5" class="outline-3">
+<h3 id="orgb35c2c5">Relation between the three delivery guarantees</h3>
+<div class="outline-text-3" id="text-orgb35c2c5">
+<pre class="example">
+┌─All──────────────────────┐
+│  ┌──FIFO─────────┐       │
+│  │               │       │
+│  │    Causal─┐   │       │
+│  │   │       │   │       │
+│  │   │    ┌──┼───┼─────┐ │
+│  │   └────┼──┘   │     │ │
+│  │        │      │     │ │
+│  └────────┼──────┘     │ │
+│           │            │ │
+│           └────────T.O.  │
+└──────────────────────────┘
+</pre>
+
+<p>
+This means that 
+</p>
+<ul class="org-ul">
+<li>There are executions with both causal and totally ordered delivery.</li>
+<li>There are executions with both FIFO and totally ordered delivery, but not causal.</li>
+<li>There are executions with totally ordered delivery buta not FIFO.</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org524b7aa" class="outline-2">
+<h2 id="org524b7aa">Snapshots of distributed system</h2>
+<div class="outline-text-2" id="text-org524b7aa">
+<p>
+Taking a snapshot at certain point in time, using wall clock time, is not safe.
+</p>
+
+<p>
+If we have two events <code>A</code> and <code>B</code>, and <code>A</code> happens-before <code>B</code>, if <code>B</code> is in the snapshot, then <code>A</code> also.
+</p>
+
+<p>
+We do need snapshots for:
+</p>
+<ul class="org-ul">
+<li>Checkpointing</li>
+<li>Deadlock detection</li>
+<li>Detection of any stable property (one it becomes true, it stays true)</li>
+</ul>
+</div>
+
+<ul class="org-ul">
+<li><a id="orgeb62f87"></a>Chandy-Lamport algorithm (1985)<br />
+<div class="outline-text-5" id="text-orgeb62f87">
+<p>
+We will call <i>channel</i> to a connection between two processes. Communication between two processes go through a channel. We introduce this notion to ensure FIFO ordering. This algorithm also assumes that messages aren't lost, corrupted or duplicated. Also assumes processes don't crash.
+</p>
+
+<p>
+<i>Initiator</i>: 
+</p>
+<ol class="org-ol">
+<li>Records its own state.</li>
+<li>Sends a marker message out on all its outgoing channels.</li>
+<li>Starts recording the messages it receives in all its incoming channels.</li>
+</ol>
+
+<p>
+<i>When process p<sub>i</sub> receives a marker message on C<sub>ki</sub></i>:
+</p>
+<ul class="org-ul">
+<li>If it's the first marker it has seen (sent or received)
+<ol class="org-ol">
+<li>p<sub>i</sub> records its state</li>
+<li>p<sub>i</sub> will mark channel C<sub>ki</sub> as empty</li>
+<li>p<sub>i</sub> sends a marker in all its outgoing channels</li>
+<li>p<sub>i</sub> starts recording in all its incomming channels</li>
+</ol></li>
+<li>Otherwise
+<ol class="org-ol">
+<li>p<sub>i</sub> stops recording on C<sub>ki</sub></li>
+</ol></li>
+</ul>
+
+<p>
+Let's look at the following example<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>, where process <code>P1</code> is the snapshot initiator.
+</p>
+
+<pre class="example">
+C21= [H-&gt;D]   C12= &lt;&gt;   C13= &lt;&gt;
+C31= &lt;&gt;       C32= &lt;&gt;   C23= &lt;&gt;
+
+   __           __          __      
+  |P1|         |P2|        |P3|    
+   |            |            |            
+ A +            |            |
+   |            |       -----+ I            
+ B +_______     |      /     |     
+   |       \---&gt;+ F   /      |
+   |===         |    /       |
+   |  \\====================&gt;|
+   |   \\       |  /         |
+   |    \\    G +&lt;-          |    
+   |     \\     |            |
+ C +      \\    |        ====|
+   |       \\   |      //    |
+   |        ||  |     //     + J
+   |&lt;===========|======      |
+   |        ||  |     ||     |
+   |     -------+ H   ||     |
+   |    /   ||  |     ||     |
+   |   /    ||  |&lt;=====      |
+ D +&lt;-/     ||  |            |
+   |     =======|===========&gt;|
+   |   //   ||  |            |
+   |&lt;===     \\ |            |
+   |          =&gt;|            |
+   |            |            |            
+   v            v            v            
+</pre>
+<p>
+[Example 10] 
+</p>
+
+
+<ol class="org-ol">
+<li>First, <code>P1</code> records its own state, which consists of events <code>A</code> and <code>B</code>. Then it trigers two marking events (in the example marking events are represented with double lines). The marker message headed to <code>P2</code> is taking a while. The marker message sent to <code>P3</code> arrives quickly. Let's follow from there.</li>
+<li>When <code>A</code>'s marker message arrives at <code>P3</code>, this process has never seen a marker message so far, so <code>P3</code> records its state, which consists of only the event <code>I</code> and marks channel <code>C13</code> as empty. Then it broadcasts marker messages and starts recording on all its incoming channels (<code>C23</code>).</li>
+<li><code>P3</code> has sent out its marker messages. Let’s consider the one that went to <code>P1</code> first. This message is not the first marker message that <code>P1</code> has seen (it has seen its own marker messages), so it will stop recording on <code>C31</code>. As nothing happened on that channel, it ends up being empty.</li>
+<li>Let's look at the marker message that <code>P3</code> sent to <code>P2</code>. As this is the first marker message that <code>P2</code> has seen, then it first records it state: <code>F</code>, <code>G</code> and <code>H</code>. Then it will mark channel <code>C32</code> as empty and start recording on all its incoming channels (only <code>C12</code>, as <code>C32</code> was already marked as empty). <code>P2</code> also sends its marker messages.</li>
+<li><code>P2</code> marker messages will finally arrive to <code>P1</code> and <code>P3</code>, that will lead to channels <code>C21</code> and <code>C23</code> recordings being stopped. In the case of <code>C21</code>, only one message was recorded, the message whose send event was <code>H</code> and whose receive event was <code>D</code>. So that event goes into <code>C21</code>'s final channel state. In the case of <code>C23</code>, it ends up being empty.</li>
+<li>Finally, the marker message from <code>P1</code> to <code>P2</code> arrives last, and it leads to channel <code>C12</code> recording being stopped while empty.</li>
+</ol>
+
+<p>
+The final snapshot consists of events: <code>A</code>, <code>B</code>, <code>F</code>, <code>G</code>, <code>H</code> and <code>I</code>. Also, the channels recordings are <code>C21= [H-&gt;D]</code> while the rest are empty.
+</p>
+
+<p>
+A question that might arise is: What’s the point of recording channel states? 
+Imagine that we want at most one process in this execution to have exclusive access to some sort of resource (say, a file). We can think of access to the resource as being a token that processes pass around. At any given time, either a process should have the token, or it should be in transit between processes.
+</p>
+
+<p>
+If we hadn't recorded on channels, the token status would have been lost from the snapshot perspective.
+</p>
+
+
+<dl class="org-dl">
+<dt>Chandy-Lamport guarantees</dt><dd><ul class="org-ul">
+<li>Consistecy with causality.</li>
+<li>Termination.</li>
+<li>Decentralization: Works fine if more than one process initiates.</li>
+</ul></dd>
+</dl>
+</div>
+</li>
+</ul>
+</div>
+
+
+
+
+<div id="outline-container-org5a1911a" class="outline-2">
+<h2 id="org5a1911a">Fault models</h2>
+<div class="outline-text-2" id="text-org5a1911a">
+</div>
+<div id="outline-container-orgf83486a" class="outline-3">
+<h3 id="orgf83486a">Safety and liveness</h3>
+<div class="outline-text-3" id="text-orgf83486a">
+<dl class="org-dl">
+<dt>Safety</dt><dd>A property that states that some "bad" thing <i>won't</i> ever happen. Properties discussed so far (FIFO delivery, causal delivery, totally-ordered delivery) are safety properties.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>Liveness</dt><dd>A property that states that a "good" property <i>will</i> eventually happen. An example of this is eventual deliver (reliable deliver), or eventual consistency.</dd>
+</dl>
+
+<p>
+Safety properties <i>can</i> be violeted in a <i>finite</i> execution. Liveness properties <i>cannot</i> be violeted in a <i>finite</i> execution.
+</p>
+
+<p>
+All properties are either safety or liveness or a combination.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org36d4496" class="outline-3">
+<h3 id="org36d4496">Faults models</h3>
+<div class="outline-text-3" id="text-org36d4496">
+<p>
+When designing a system, certain assumptions about the environment in which that system will operate need to be made. In particular, when designing a fault tolerant system, it's important to know which faults can happen. A fault model determines what kind of faults can occur. A <b>fault model</b> is a specification that indicates what kinds of faults a system can exhibit.
+</p>
+
+<p>
+Let's take a look at the following example where processes <code>m1</code> and <code>m2</code> communicate with each other via the network.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ascii">  ┌─────────┐  
+  │  x?     ▼  
+┌─┴┐       ┌──┐
+│m1│       │m2│
+└──┘       └┬─┘
+  ▲   5     │  
+  └─────────┘  
+</pre>
+</div>
+
+
+<p>
+Things that can go wrong from <code>m1</code>'s perspective, and not hear the expected answer back:
+</p>
+
+<ol class="org-ol">
+<li>Message from <code>m1</code> can get lost</li>
+<li>Message from <code>m1</code> is slow</li>
+<li><code>m2</code> crashed</li>
+<li><code>m2</code> is slow</li>
+<li>Message from <code>m2</code> is slow</li>
+<li>Message from <code>m2</code> can get lost</li>
+<li><code>m2</code> lies</li>
+</ol>
+
+<p>
+<b>Crash fault</b>: A process fails by halting, it stops sending/receiving messages. Case 3<br />
+<b>Fail-stop fault</b>: A process fails by halting, and everyone knows it crashed (this is not the case in a crash fault). For example, a process can bradcast its death so everyone knows. It's not very realistic.
+<b>Omission fault</b>: A message is lost, a process fails to send or receive a message. Cases 1 and 6<br />
+<b>Timing fault</b>: A process responds too late (or too early). Cases 2, 4 and 5<br />
+<b>Byzantine fault</b>: A process behaves in arbitrary way or even malicious. Case 7
+</p>
+
+
+<p>
+Fail-stop faults \(\,\subset\,\) Crash faults \(\, \subset\, \) Omission faults \( \,\subset\, \) Byzantine faults 
+</p>
+
+<p>
+Regarding timing faults, in a distributed model, those are expected.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org234df1e" class="outline-3">
+<h3 id="org234df1e">Two generals problem</h3>
+<div class="outline-text-3" id="text-org234df1e">
+<p>
+Two armies, each led by a different general, are preparing to attack a fortified city. The armies are encamped near the city, each in its own valley. A third valley separates the two hills, and the only way for the two generals to communicate is by sending messengers through the valley. Unfortunately, the valley is occupied by the city's defenders and there's a chance that any given messenger sent through the valley will be captured.
+</p>
+
+<pre class="example">
+	     __          __ 
+	    |G1|        |G2|
+Let's attack |           |
+  at dawn    |\---------&gt;|
+	     |           |
+	     |          /| Ok 
+	     |&lt;--------- |
+	     |           | 
+	     v           v
+</pre>
+
+<p>
+General 1 sends a message proposing a combined attack at dawn. General 2 receives the message and responds positively. Can G1 confidently attack at dawn? No, as she knows that is impossible for G2 to know that her "Ok" message has arrived. Let's say G1 acknowledges G2's message. Can she be sure now? No. In this setting, it is impossible for G1 and G2 to attack being sure that the otther will.
+</p>
+
+<p>
+The setting here is the <b>omission model</b>, where omission faults are expected.
+</p>
+
+<p>
+A possible workaround is to base the attack on probability. G1 will send several messages to propose attacks and will stop sending them on G2's acknowledgement. If it's been a while since G2 has stopped listening to G1's messages, then it can be confident that she received the message. Confidence grows as time passes and no new messagges arrives.
+</p>
+
+
+<pre class="example">
+	     __          __ 
+	    |G1|        |G2|
+Let's attack |           |
+  at dawn    |\-----&gt;    |
+Let's attack |           |
+  at dawn    |\-----&gt;    |
+Let's attack |           |
+  at dawn    |\-----&gt;    |
+Let's attack |           |
+  at dawn    |\---------&gt;|
+Let's attack |           |
+  at dawn    |\----&gt;     |
+	     |          /| Ok 
+	     |&lt;--------- | .
+	     |           | .
+	     |           | .
+	     |           | .
+	     v           v
+</pre>
+
+<p>
+A second workaround is based on common knowledge. Knowledge is considered <b>common</b> if everyone knows about it and everyone knows that everyone knows.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org900cada" class="outline-3">
+<h3 id="org900cada">Forms of fault tolerance</h3>
+<div class="outline-text-3" id="text-org900cada">
+<p>
+We've discussed byzantine faults, it turns out there are some of those faults that are easier to avoid.
+Say that you can detect messages being corrupted (via checksum for example). In that case you can treat it as an ommision fault and just discard the message.
+</p>
+
+<p>
+What does it mean to tolerate a class of faults? 
+A correct program satisfies both its safety and liveness properties. 
+</p>
+
+<p>
+How wrong does a program go in the presence of a given class of faults
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">live</td>
+<td class="org-left">not live</td>
+</tr>
+
+<tr>
+<td class="org-left">safe</td>
+<td class="org-left">masking</td>
+<td class="org-left">fail safe</td>
+</tr>
+
+<tr>
+<td class="org-left">not safe</td>
+<td class="org-left">non masking</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+For example, in FIFO delivery, let's say that its safety property talks about the order of the messages in the delivery, while liveness talks about messages eventually arriving. Then it might be useful to have a fails-safe model that preserves order while maybe compromising some messages arriving.
+</p>
+</div>
+
+<ul class="org-ul">
+<li><a id="orgdf55b28"></a>Reliable delivery<br />
+<div class="outline-text-5" id="text-orgdf55b28">
+<p>
+Let <code>p1</code> be a process that delivers a message <code>m</code> to process <code>p2</code>. Then if neither <code>p1</code> not <code>p2</code> crashes and not all messages are lost, then <code>p2</code> eventually delivers <code>m</code>.
+</p>
+
+
+<p>
+A possible implementation of reliable delivery is the one described in the two generals section. The sender might send the message on and on until it receives an ack. The problem with this implementation is that the receiver ack might be lost, so the receiver will still be getting messages. This might or might not be an issue. In the case of the two generals it was not an issue. In general, if the message is idempotent, there's not an issue.
+</p>
+
+<p>
+Reliable delivery is also called <i>at-least-once</i> delivery.
+</p>
+
+<p>
+Can we have <i>exactly-once</i> delivery?
+</p>
+
+<p>
+Systems that claim to have exactly-once delivery mainly fit into one of these two categories: 1. The messsages where idempotent anyway or 2. They make an effort on receiver's side to deduplicate messages.
+</p>
+</div>
+</li>
+
+<li><a id="org1d03273"></a>Reliable broadcast<br />
+<div class="outline-text-5" id="text-org1d03273">
+<p>
+It stands for <i>one sends, everyone receives</i>.
+</p>
+
+<p>
+If a correct process delivers <code>m</code>, then all correct processes deliver <code>m</code>. The definition of <i>correct process</i> will depend on the fault model we're based on. If the fault model is the crash model, then messages being lost is not an issue, and processes are correct if they don't crash. In the ommision model, we will have to add the condition of not all messages being lost.
+</p>
+
+<p>
+For now, we're on the crash model.
+</p>
+
+<pre class="example">
+ _            _            _      
+|A|          |B|          |C|    
+ |            |            |           
+ +_______     |            |     
+ |       \---&gt;+ ✓          |
+ X            |            |
+ X            |            |            
+ v            v            v            
+</pre>
+
+<p>
+[Example 11] 
+</p>
+
+<p>
+In this example, process <code>A</code> sends the first message of the braodcast to <code>B</code> and <code>B</code> delivers, but then <code>A</code> crashes before it can send it to <code>C</code>.
+</p>
+
+<p>
+As you can see, this protocol does not reliably deliver.
+</p>
+
+<p>
+Let's say now that everytime a process receives a message, it broadcasts it to everyone else before delivering it.
+</p>
+
+<pre class="example">
+ _            _            _      
+|A|          |B|          |C|    
+ |            |            |           
+ +_______     |            |     
+ |       \---&gt;+            |
+ X          --+            |
+ X&lt;--------/  +--          |            
+ X            |  \--------&gt;+
+ X            | ✓        --+
+ X            |         / /+
+ X            |&lt;-------/ / | ✓
+ X            |         /  |
+ X&lt;--------------------/   |
+ X            |            |
+ v            v            v            
+</pre>
+
+<p>
+[Example 12] 
+</p>
+
+<p>
+Even thought <code>A</code> crashes, <code>B</code> will be also broadcasting the message to <code>C</code> (and <code>A</code>) and then delivering it. When <code>C</code> receives the message it will do the same. 
+</p>
+
+<p>
+So if <code>B</code> also crashes after the first message, then no one would have delivered, and the reliability condition would be met. If <code>B</code> crashes after sending the two messages, then <code>C</code> would be delivering but it would also be the only correct process and the condition would also be met.
+</p>
+
+<p>
+A good addition would be to not send the message back to the sender.
+</p>
+
+<p>
+If no one crashes, processes will see the message more than once. They will need to keep track of what they've delivered so they don't do it twice
+</p>
+
+<p>
+If we need this protocol to also work on the omission model, we can just make each message follow the reliable deliver protocol as well, and build the broadcasting on top of it.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Fault-tolerance often involves making copies.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org3a8617b" class="outline-2">
+<h2 id="org3a8617b">Replication</h2>
+<div class="outline-text-2" id="text-org3a8617b">
+<p>
+Why replicate data?
+</p>
+
+<ul class="org-ul">
+<li>Fault-tolerance: prevent data loss.</li>
+<li>Scale horizontally: divides the load.</li>
+<li>Data locality</li>
+</ul>
+
+<p>
+Downsides:
+</p>
+<ul class="org-ul">
+<li>Higher cost</li>
+<li>Keep consistent replicas</li>
+</ul>
+
+
+<dl class="org-dl">
+<dt>Strong consistency</dt><dd>A replicated storage system is strongly consistent if clients cannot tell that the data is replicated.</dd>
+</dl>
+</div>
+
+<div id="outline-container-org384a834" class="outline-4">
+<h4 id="org384a834">Primary-backup replication</h4>
+<div class="outline-text-4" id="text-org384a834">
+<p>
+A particular process is chosen as the primary, and the rest are backup. Clients only operates with the primary
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc2be52c" class="outline-4">
+<h4 id="orgc2be52c">Chain replication</h4>
+<div class="outline-text-4" id="text-orgc2be52c">
+<p>
+The primary receives writes, sends the write event to next replica and this goes on until the last replica, that both applies the change and responds to client. Reads are from last replica. This one has better write throughput, and better at scaling horizontally, as it divides the load between reads and writes. Works best at 15% writes, 85% reads, as it divides the work more or less equally. Write latency is higher (depending on number of replicas), as replication requests are sequential.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org0fbac83" class="outline-4">
+<h4 id="org0fbac83">Total order vs. determinism</h4>
+<div class="outline-text-4" id="text-org0fbac83">
+<pre class="example">
+ _            _          _            _
+|C1|         |R1|       |R2|         |C2|
+ |            |          |            |
+ |____x=1     |          |      _x=2__|
+ |  \    \---&gt;|          |&lt;----/    / |
+ |   \        |    x=1   |         /  |
+ |    \-----------------&gt;|        /   |
+ |            |          |   x=2 /    |
+ |            |&lt;----------------/     |
+ |            |          |            |
+ v            v          v            v
+</pre>
+
+<p>
+In the first replica, <code>x</code> will end up being 2, while in the second replica it will end up being 1. This is a violation of total order delivery.
+</p>
+
+<p>
+If we had only one replica, <code>x</code> could end up being 1 or 2, but it does not violate total order delivery. So in this case the behaviour is not deterministic, as multiple runs of the same scenario could end up in different result.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8ff9e84" class="outline-3">
+<h3 id="org8ff9e84">Consistency models</h3>
+<div class="outline-text-3" id="text-org8ff9e84">
+<dl class="org-dl">
+<dt>Read your writes (RYW)</dt><dd>Reading a value after wrinting it gives you the value just written.</dd>
+</dl>
+
+<p>
+Example 13 shows a scenario where read your writes does not hold
+</p>
+
+<pre class="example">
+__            __           __
+|A|          |R1|         |R2|
+ |            |            | 
+ |\__x=4_     |            |
+ |       \---&gt;|            |
+ |            |            |
+ |  ack   ----|            |
+ |&lt;------/    |            |
+ |            |            |
+ |\___x?_     |            |
+ |       \----------------&gt;|
+ |            |            |
+ |  ???   -----------------|
+ |&lt;------/    |            |
+ v            v            v
+</pre>
+<p>
+[Example 13]
+</p>
+
+<dl class="org-dl">
+<dt>FIFO consistency</dt><dd>Writes done by a process are seen by all processes.</dd>
+</dl>
+
+<p>
+The folowing example violates FIFO consistency.
+</p>
+
+<pre class="example">
+ _            __           __           _
+|A|          |R1|         |R2|         |B|
+ |            |            |            |  
+ |\_dep50$    |            |            | 
+ |       \---&gt;|-           |            | 
+ |            | \          |            | 
+ |   ok   ----|  \dep50$   |            | 
+ |&lt;------/    |   \        |            | 
+ |            |    \       |            | 
+ |\_wd40$     |     \      |            | 
+ |       \---&gt;|- wd40\     |            | 
+ |            | \---------&gt;|  /---------| balance? 
+ |  ok    ----|        \   |&lt;-          |
+ |&lt;------/    |         \  |-----------&gt;| -40$
+ |            |          -&gt;|            | 
+ v            v            v            v
+</pre>
+<p>
+[Example 14]
+</p>
+
+<dl class="org-dl">
+<dt>Causal consistency</dt><dd>Writes that are related by happens-before relationship must be seen in the same causal order by all processes.</dd>
+</dl>
+
+<p>
+The following example is a violation of causal consistency.
+</p>
+
+<pre class="example">
+ _            __           __           _
+|A|          |R1|         |R2|         |B|
+ |            |            |            |  
+ |\dep100$    |            |           /| balance?
+ |       \---&gt;|            |          / | 
+ |            |            |         /  | 
+ |   ok   ----|            |        /   | 
+ |&lt;------/    |&lt;-------------------/    | 
+ |            |----------------         | 
+ |            |            |   \-------&gt;| 100$ 
+ |            |            |            | 
+ |            |            |  /---------| wd50$ 
+ |            |            |&lt;-          |
+ |            |            |-----------&gt;| No funds
+ |            |            |            | 
+ v            v            v            v
+</pre>
+<p>
+[Example 15]
+</p>
+
+<p class="verse">
+Strong consistency \(\,\subset\,\) Causal consistency \(\, \subset\, \) FIFO consistency \( \,\subset\, \) RYW consistency<br />
+</p>
+
+<p>
+These are only some consistency models that can be find.
+</p>
+</div>
+
+
+<div id="outline-container-org564f936" class="outline-4">
+<h4 id="org564f936">Strongly consistent replication models</h4>
+<div class="outline-text-4" id="text-org564f936">
+<p>
+There are two alreay discussed: primary back up and chain replication.
+In these two models, there also has to exist some sort of coordinator that knows about replicas, the order(in the case of chain replication) and its status, whether it has failed or not. In case of failure, the coordinator will acknowledge that and rearrange the chain in the case of chain replication or the fact about who's the primary in primary back up.
+</p>
+
+<p>
+But what if the coordinator fails? As we would like to keep coordination separated from the data nodes themselves, having no coordinator at all might not be the best solution. We could have many coordinators running a consensus protocol. 
+</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org01906d8" class="outline-2">
+<h2 id="org01906d8">Consensus</h2>
+<div class="outline-text-2" id="text-org01906d8">
+<p>
+When do we need consensus? When we have a bunch of processes and &#x2026;
+</p>
+<ul class="org-ul">
+<li>we need them to deliver messages in the same order (<b>totally-ordered broadcast</b>), or</li>
+<li>we need all of them to know about the rest (<b>group membership</b>), or</li>
+<li>one of them has a special role and the rest need to know about that (<b>leader election</b>), or</li>
+<li>there's a shared resource that can only be accesses by one at a time (<b>distributed mutual exclusion</b>), or</li>
+<li>they are participating in a transaction where a desicion about commiting/abouting needs to be agreed upon (<b>distributed transaction commit</b>)</li>
+</ul>
+
+
+<pre class="example">
+	 ┌───────────┐         
+1 ──────►│           ├──────► 1
+	 │           │         
+0 ──────►│ Consensus ├──────► 1
+	 │           │         
+1 ──────►│           ├──────► 1
+	 └───────────┘         
+</pre>
+
+<p>
+Properties to <i>try</i> to satisfy:
+</p>
+
+<dl class="org-dl">
+<dt>Termination</dt><dd>Each correct process eventually decides on a value.</dd>
+<dt>Agreement</dt><dd>All correct processes decide on the same value.</dd>
+<dt>Validity (integrity, non-triviality)</dt><dd>The agreed upon value must be one of the proposed values.</dd>
+</dl>
+
+<p>
+In the asynchronous network model and the crash fault model, no consensus algorithms can satisfy all these three. This was proved in 1983 by Fisher Lynch and Patterson (FLP)<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup>, this is called the impossibility of distributed consensus with one faulty process.
+</p>
+</div>
+
+
+
+<div id="outline-container-org6b20f1c" class="outline-3">
+<h3 id="org6b20f1c">Paxos</h3>
+<div class="outline-text-3" id="text-org6b20f1c">
+<p>
+Paxos<sup><a id="fnr.4" class="footref" href="#fn.4">4</a></sup><sup>, </sup><sup><a id="fnr.5" class="footref" href="#fn.5">5</a></sup> is a consensus algorithm proposed by Leslie Lamport. 
+</p>
+
+<p>
+In this algorithm, there's three roles that a process can play (one or more): 
+</p>
+
+<ul class="org-ul">
+<li><b>Proposer</b> proposes values</li>
+<li><b>Acceptor</b> contributes to choose from the proposed values</li>
+<li><b>Learner</b> learns the agreed upon values</li>
+</ul>
+
+<p>
+Paxos nodes must:
+</p>
+<ul class="org-ul">
+<li>persist data</li>
+<li>know which number conforms a majority of acceptors</li>
+</ul>
+
+<p>
+The algorithm rules are:
+</p>
+
+<p>
+<b>Phase 1</b> Kick off
+</p>
+
+<ul class="org-ul">
+<li>A <b>proposer</b> sends a prepare message, with a proposal id <code>n</code> to (at least) a majority of accepters. <code>n</code> must be unique and higher than any proposed number that this proposer has proposed before. Uniqueness must also work across proposers, so they will have to previously decide on a set of values each can use (if there's two proposers, one can take odd numbers and the other one even).</li>
+
+<li>When an <b>acceptor</b> receives a <code>prepera(n)</code> message, 
+<ul class="org-ul">
+<li>IF this node promised to ignore any proposal with this <code>n</code> id, it ignores the message.</li>
+<li>IF NOT, it promises to ignore any request with a proposal number lower than <code>n</code>, and replies with <code>promise(n)</code>.  (*)</li>
+</ul></li>
+</ul>
+
+<p>
+<b>Phase 2</b> Proposer has received <code>promise(n)</code> from a majority of acceptors (for some id <code>n</code>).
+</p>
+
+<ul class="org-ul">
+<li><b>Proposer</b> sends an <code>accept(n, val)</code> to (at least) a majority of acceptors, where <code>n</code> is the id promised in phase 1, and <code>val</code> is the actual value it wants to propose. (**)</li>
+<li><b>Acceptor</b> on receiving an <code>accept(n, val)</code> will
+<ul class="org-ul">
+<li>IF this node promised to ignore any proposal with this <code>n</code>, it ignores the message</li>
+<li>IF NOT, replies with <code>accepted(n,val)</code> and also sends that message to all the learners</li>
+</ul></li>
+</ul>
+
+<p>
+Let's look at a simple example:
+</p>
+
+
+
+<pre class="example">
+	     _            __           __           __           __            __
+	    |P|          |A1|         |A2|         |A3|         |L1|          |L2|            
+	     |            |             |            |            |             |   
+  prepare(5) |\----------&gt;|             |            |            |             |
+	     | \-----------------------&gt;|            |            |             | 
+	     |            |             |            |            |             | 
+	     |        ----|prom(5)      |            |            |             |
+	     |&lt;------/  ----------------| prom(5)    |            |             | 
+	     |&lt;------- /  |             |            |            |             |
+	     |            |             |            |            |             | 
+	     |            |             |            |            |             | 
+milestone 1 ---------------------------------------------------------------------------
+	     |            |             |            |            |             |   
+accept(5,X)  |\----------&gt;|             |            |            |             |
+	     | \-----------------------&gt;|            |            |             | 
+	     |        ----|accptd(5,X)  |            |            |             |
+	     |&lt;------/    |\            |            |            |             |
+	     |            |\---------------------------------------------------&gt;|
+	     |            | -------------------------------------&gt;|             |
+	     |            |             |            |            |             |   
+	     |          ----------------|accptd(5,X) |            |             |   
+	     |&lt;--------/  |             |            |            |             |   
+	     |            |             |\-------------------------------------&gt;|
+	     |            |             |\-----------------------&gt;|             |
+	     |            |             |            |            |             | 
+	     |            |             |            |            |             | 
+milestone 2 ---------------------------------------------------------------------------
+	     |            |             |            |            |             | 
+	     |            |             |            |            |             | 
+	     |            |             |            |            |             | 
+	     v            v             v            v            v             v
+</pre>
+<p>
+[Example 16]
+</p>
+
+<p>
+First, the proposer <code>P</code> sends <code>prepare(5)</code> to a majority of accepters, in this case to <code>A1</code> and <code>A2</code>. Both of them have never promised to reject <code>5</code>, so they respond with <code>promised(5)</code>.
+</p>
+
+<p>
+At milestone 1, the proposed id <code>n</code> has been accepted by a majority of accepters.
+</p>
+
+<p>
+Now <code>P</code> can propose a value to agree upon, in this case that value will be <code>X</code>. For this, it sends <code>accept(5, X)</code> to a majority of acceptors. As <code>A1</code> and <code>A2</code> have never promised to reject <code>5</code>, they respond with <code>accepted(5,X)</code>, and they also send this message to learners.
+</p>
+
+<p>
+At milestone 2, consensus is reached, as a majority af acceptors have accepted a value <code>X</code>. <code>A1</code> and <code>A2</code> still don't know about this, but the proposer does.
+</p>
+
+<p>
+Milestone 3 happens independently, when each node knows the consensus has been reached about the value <code>X</code>.
+</p>
+
+
+<p>
+So far we've seen the simple paxos. We've placed some asterisks in the algorithm description to elaborate more.
+</p>
+
+<p>
+(*) In the case of phase 1, when an acceptor receives a message <code>promise(n)</code>, and it has NOT promised to ignore than <code>n</code>, then
+</p>
+<ul class="org-ul">
+<li>IF it has previously accepted on something, it replies with <code>promise(n, (n_prev, val_prev))</code></li>
+<li>IF NOT, it replies with <code>promise(n)</code></li>
+</ul>
+
+<p>
+(**) In phase 2, when a proposer has received <code>promise(n)</code> or <code>promise(n, (n_prev, val_prev))</code> from a majority of acceptors (for some id <code>n</code>), then it sends an <code>accept(n, val)</code> to (at least) a majority of acceptors, where <code>n</code> is the id promised in phase 1 and <code>val</code> is the  <code>val_prev</code> that came with the highest id <code>n_prev</code>. If there where none of those messages, then it can propose its own value.
+</p>
+
+<p>
+The example 16 does not explore these new paths, so let's look at another slighly more complex example, with two proposers. Learners are not drawn, for simplicity.
+</p>
+
+
+<pre class="example">
+	     _            __           __            __            __
+	    |P1|         |A1|         |A2|          |A3|          |P2|            
+	     |            |             |             |            |
+  prepare(5) |\----------&gt;|             |             |            |
+	     | \-----------------------&gt;|             |            |
+	     |            |             |             |            |
+	     |        ----|promise(5)   |             |            |
+	     |&lt;------/  ----------------| prom(5)     |            |
+	     |&lt;------- /  |             |             |            |
+	     |            |             |             |            |
+	     |            |             |             |            |
+	     |            |             |             |            |
+accept(5,X)  |\----------&gt;|             |             |            |
+	     | \-----------------------&gt;|             |&lt;----------/| prepare(6)
+	     |        ----|acceptd(5,X) |             |\         / |
+	     |&lt;------/    |&lt;----------------------------\-------/  |
+	     |            |             |             |  \--------&gt;| promise(6)
+	     |            |             |             |       /    |             
+	     |          ----------------|acceptd(5,X) |      /     |             
+	     |&lt;--------/  |             |             |     /      |             
+	     |            |             |&lt;-----------------/       |   
+	     |            |             |             |            |
+	     |            |\--------------------------------------&gt;| promise(6,(5,X))
+	     |            |             |\------------------------&gt;| promise(6,(5,X))
+	     |            |             |             |            |      
+	     |            |             |             |            |         
+	     |            |             |             |&lt;----------/| accept(6, X)
+	     |            |             |&lt;-----------------------/ |
+	     |            |             |             |\----------&gt;| accepted(6,X)
+	     |            |             |\------------------------&gt;| accepted(6,X)
+	     v            v             v            v            v      
+</pre>
+<p>
+[Example 17]
+</p>
+
+<p>
+In this example, after <code>A1</code> and <code>A2</code> have responded with <code>accepted(5,X)</code> and <code>P1</code> has reached milestone 1, proposer <code>P2</code> starts a new consensus run by sending <code>prepare(6)</code> messages to the three accepters. <code>A3</code> hadn't promissed or accepted anuthing before so it responds with <code>promise(6)</code>.
+</p>
+
+<p>
+In the case of <code>A1</code> and <code>A2</code>, they had both already accepted the value <code>X</code> for run <code>5</code>, so they respond with <code>promise(6,(5,X)))</code>. When <code>P2</code> receives these messages, it takes the value of the higher previously promised <code>n</code>. In this case they are both 5, so the value chosen will be <code>X</code>.
+</p>
+
+<p>
+At this point <code>P2</code> starts phase 2 by sending <code>accept(6, X)</code> to a majority of accepters (<code>A1</code>, <code>A2</code> and <code>A3</code>) which respond with <code>accepted</code> messages.
+</p>
+
+
+<p>
+<b>Facts about paxos</b>
+</p>
+<ul class="org-ul">
+<li>If a majority of acceptors promise on a number <code>n</code>, no paxos run with value less than <code>n</code> can succeed.</li>
+<li>If a majority of acceptors accept on <code>(n, value)</code> then consensus is reached. Consensus is about <code>value</code> an not id <code>n</code>.</li>
+<li>If a proposer or a learner gets majority of accepts on a value for a specific <code>n</code>, then they know that consensus has been reached on that value.</li>
+</ul>
+
+<p>
+<b>Dueling proposers</b>
+</p>
+
+<p>
+What about the FLP result? Well, the property that paxos fails to guarantee is termination. In example 18 you can see how two proposers can step into each others toes.
+</p>
+
+
+<pre class="example">
+	   _            __             __            __            __
+	  |P1|         |A1|           |A2|          |A3|          |P2|            
+	   |            |               |             |            |
+prepare(5) |\----------&gt;|               |             |            |
+	   | \-------------------------&gt;|             |            |
+	   |            |               |             |            |
+	   |        ----|               |             |            |
+promise(5) |&lt;------/  ------------------|             |            |
+promise(5) |&lt;------- /  |               |             |            |
+	   |            |               |             |            |
+	   |            |               |             |&lt;----------/| prepare(6)
+	   |            |               |             |\         / |
+	   |            |               |&lt;--------------\-------/  |
+	   |            |               |             |  \--------&gt;| promise(6)
+	   |            |               |             |            |     
+	   |            |               |\------------------------&gt;| promise(6)
+accept(5,A)|\----------&gt;|               |             |            |
+	   | \-------------------------&gt;X             |            |
+    .      |            |               |             |            |
+    .      |        ----|accepted(5,A)  |             |            |
+    .      |&lt;------/    |               |             |            |
+ TIMEOUT   |            |               |             |            |
+prepare(7) |\----------&gt;|               |             |&lt;----------/| accept(6,B)
+	   | \-------------------------&gt;|             |\         / |
+	   |        ----|               |             | \       /  |
+promise(7) |&lt;------/  ------------------|             |  \-----/--&gt;| accepted(6,B)
+promise(7) |&lt;------- /  |               |             |       /    |     .
+	   |            |               X&lt;-------------------/     |     . 
+	   |            |               |             |            |     .
+	   |            |               |             |            |  TIMEOUT
+	   |            |               |             |&lt;----------/| prepare(8)
+	   |            |               |             |\         / |
+	   |            |               |&lt;--------------\-------/  |
+	   |            |               |             |  \--------&gt;| promise(8)
+	   |            |               |             |            |     
+	   |            |               |\------------------------&gt;| promise(8)
+accept(7,A)|\----------&gt;|               |             |            |
+	   | \-------------------------&gt;X             |            |
+	   |            |               |             |            |
+	   v            v               v             v            v      
+</pre>
+<p>
+[Example 18]
+</p>
+
+<p>
+In the example, <code>P1</code> starts a consensus run, gets promises on <code>5</code> from <code>A1</code> and <code>A2</code>.<br />
+Right after that, and before <code>P1</code> can propose value <code>A</code>, <code>P2</code> starts a consensus run and gets promises on <code>6</code> from <code>A2</code> and <code>A3</code>. This can happen because <code>A2</code> still did not accept anything.<br />
+When <code>P1</code> sends the accept messages, <code>A1</code> will respond accepting, but message will be ignored by <code>A2</code>, because <code>A2</code> has just promised on ignoring ids less than <code>6</code>.<br />
+Time passes and <code>P1</code> timeouts on waiting for accepted mesage from <code>A2</code>, so it starts a new round. It sends prepare message with an increased id of <code>7</code>, and gets the promises back from <code>A1</code> and <code>A2</code>, as before. <br />
+Right after <code>A2</code> promises on rejecting ids less than <code>7</code>, the accept message from proposer <code>P2</code> arrived, and therefore ignored. So <code>P2</code> will also timeout waiting for <code>A2</code>'s response.<br />
+This can go on and on forever.
+</p>
+
+<p>
+So how can we deal with this issue?
+</p>
+
+<p>
+We can try to mitigate the problem using some heuristics.
+</p>
+
+<p>
+One possibility is to <i>try</i> to have only one proposer, so dueling never happens. For that, we can elect a leader, using another consensus algorithm. Why another? to use one that guarantees termination. Maybe that other algorithm does not guarantee uniqueness of the leader, but even in that case it reduces the chances of dueling happening, as long as it decides on only one leader most of the time.
+</p>
+
+<p>
+Another alternative is imposing an exponential backoff pause after timeout, so that eventually one proposer can get its value accepted before the other process proposes a new id.
+</p>
+</div>
+
+
+<ul class="org-ul">
+<li><a id="org3477837"></a>Multi-paxos<br />
+<div class="outline-text-5" id="text-org3477837">
+<p>
+What if we neeed to decide on many values? 
+For example, let's say we're deciding on totally order delivery, so each time a message arrives, a consensus run needs to take place. 
+An alternative version of the algorithm lets the proposer that won a run on paxos to keep proposing values under the winner id, skipping phase 1. As soon as a new proposers starts a new consensus run under a higher id, that privilege will be taken off him.
+But as long as noone else interrupts the sequence, phase 2 can be used.
+</p>
+</div>
+</li>
+
+
+<li><a id="org59021ec"></a>Fault tolerance of paxos<br />
+<div class="outline-text-5" id="text-org59021ec">
+<p>
+As long as a majority of acceptors do not crash, paxos can go on.
+So we want to tolerate f crashes, the we will need 2*f+1 acceptors.
+</p>
+
+<p>
+Regarding proposers, we need at least always one.
+</p>
+
+<p>
+On the other hand, it works ok under ommision faults.
+</p>
+</div>
+</li>
+
+
+<li><a id="orgb8862d4"></a>Alternatives to paxos<br />
+<div class="outline-text-5" id="text-orgb8862d4">
+<ul class="org-ul">
+<li>Raft (Diego Ongaro &amp; John Ousterhout, 2014) - Inteded to be easy to understand</li>
+<li>Zab (Zookeeper atomic broadcast) - Yahoo! research</li>
+<li>ViewStamped replication (Brian Oki &amp; Barbara Liskov, 1998)</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+
+
+
+
+
+<div id="outline-container-orgc92151d" class="outline-2">
+<h2 id="orgc92151d">Dynamo style DBs</h2>
+<div class="outline-text-2" id="text-orgc92151d">
+</div>
+<div id="outline-container-org44064c2" class="outline-3">
+<h3 id="org44064c2">Passive vs Active replication</h3>
+<div class="outline-text-3" id="text-org44064c2">
+<p>
+Active (State machine replication): Execute each operation in each replica. So what is sent over the network is the operation itself. This is better if the state update is large (multiply each entry by 10).
+</p>
+
+<p>
+Passive: Execute the operation in the primary and send updated state to each replica. This is better if the operation is expensive.
+</p>
+</div>
+</div>
+
+
+
+<div id="outline-container-org7dc62a0" class="outline-3">
+<h3 id="org7dc62a0">CAP</h3>
+<div class="outline-text-3" id="text-org7dc62a0">
+<p>
+CAP stands for: Consistency, Availability, Partition tolerance
+</p>
+
+<dl class="org-dl">
+<dt>Network partitions</dt><dd>When a subset of machines cannot talk to another subset.</dd>
+
+<dt>Availability</dt><dd>Every request receives a response</dd>
+</dl>
+
+<p>
+Primary backup replication chooses a sync replication, where responses to clients are given after receiveing the acknowdlege of each replica. In the case of a netwwork partition, when the client can talk to the primary but primary cannot talk to any replica, the primary won't respond to the client, or respond with an error, compromising availability but protecting consistency.
+</p>
+
+<p>
+Dynamo style DBs chooses a different approach. They prioritize availability, while introducing the chance of breaking consistency.
+</p>
+
+<p>
+The CAP theorem talks about this. 
+</p>
+
+<dl class="org-dl">
+<dt>CAP theorem</dt><dd>In a scenario where partitions can happen, you cannot have perfect availability and perfect consistency.</dd>
+</dl>
+</div>
+</div>
+
+
+<div id="outline-container-org4daceb2" class="outline-3">
+<h3 id="org4daceb2">Eventual consistency and strong convergence</h3>
+<div class="outline-text-3" id="text-org4daceb2">
+<p>
+Replicas eventually agree, if clients stop sending queries. [Liveness property]
+</p>
+
+<p>
+Consistency guarantees are safety properties (FIFO, Strong, RYW, Causal)
+</p>
+
+<p>
+There is a safety property than can somehow express strong consistency, and is <b>Strong convergence</b>: Replicas that have delivered the same set of updates, have the equivalent state.
+</p>
+
+
+<pre class="example">
+a) _            _          _            _
+  |C1|         |R1|       |R2|         |C2|
+   |            |          |            |
+   |____x=1     |          |      _x=2__|
+   |  \    \---&gt;|          |&lt;----/    / |
+   |   \        |    x=1   |         /  |
+   |    \-----------------&gt;|        /   |
+   |            |          |   x=2 /    |
+   |            |&lt;----------------/     |
+   |            |          |            |
+   v            v          v            v
+	      {x=2}      {x=1}
+
+b) _            _          _            _
+  |C1|         |R1|       |R2|         |C2|
+   |            |          |            |
+   |____x=1     |          |      _y=2__|
+   |  \    \---&gt;|          |&lt;----/    / |
+   |   \        |    x=1   |         /  |
+   |    \-----------------&gt;|        /   |
+   |            |          |   y=2 /    |
+   |            |&lt;----------------/     |
+   |            |          |            |
+   v            v          v            v
+	    {x=1,y=2}  {x=1,y=2}
+</pre>
+<p>
+[Example 19]
+</p>
+
+<p>
+Example 19.a violates both strong consistence and strong convergence, while example 19.b only violates strong consistency, while strong convergence is satisfied.
+</p>
+
+<p>
+"Strong eventual consistency" is sometimes used to refer to strong convergence + eventual consistency. (A liveness + a safety property)
+</p>
+
+<p>
+In the following example we see a possible solution for the issue
+</p>
+
+<pre class="example">
+|C1|         |R1|       |R2|         |C2|
+ |            |          |            |
+ |____x=1     |          |      _x=2__|
+ |  \    \---&gt;|          |&lt;----/    / |
+ |   \        |    x=1   |         /  |
+ |    \-----------------&gt;|        /   |
+ |            |          |   x=2 /    |
+ |            |&lt;----------------/     |
+ |            |          |            |
+ v            v          v            v
+	  {x=1,2}  {x=2,1}
+</pre>
+<p>
+[Example 20]
+</p>
+
+<p>
+The replicas will look at the vector clocks of the two updates and realize that they were concurrent, and store both values, so that clients can decide later wich value to keep. By doing this we now have strong convergence.
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-orgbc56626" class="outline-3">
+<h3 id="orgbc56626">Dealing with replicas that disagree</h3>
+<div class="outline-text-3" id="text-orgbc56626">
+<p>
+These two concepts are synonims in general, but in the context of the dynamo paper, they mean slightly two different things.
+</p>
+
+<dl class="org-dl">
+<dt>Anti-entropy</dt><dd>Resolving conflict in applicatation state (KVS = Application).</dd>
+<dt>Gossip</dt><dd>Resolving conflict in view state, meaning, in knowing who's up, who's alive.</dd>
+</dl>
+
+<p>
+The main difference here is the load. Anti-entropy has to hanle much higher load, as it has to share the whole KV state in each round. For this, it uses merkle trees (aka hash trees).
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc1577a8" class="outline-3">
+<h3 id="orgc1577a8">Quorum consistency</h3>
+<div class="outline-text-3" id="text-orgc1577a8">
+<p>
+How many replica responses should clients wait for?
+</p>
+
+<p>
+Quorum system let you configure this:
+</p>
+
+<dl class="org-dl">
+<dt>N</dt><dd>Number of replicas</dd>
+<dt>W</dt><dd>Write quorum</dd>
+<dt>R</dt><dd>Read quorum</dd>
+</dl>
+
+<p>
+If we have this setting: N=3, W=3, R=1, it might look similar to primary-backup or chain replication, but the important difference is that in those moedls, clients only talk to one designated replica, while here clients can talk to anyone. So strong consistency is not totally guaranteed.
+</p>
+
+<p>
+Dynamo proposes something like: N=3, W=2, R=2. More generally W+R&gt;N, so we know that any read quqrum will intersect with any write quorum.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5e3fa57" class="outline-3">
+<h3 id="org5e3fa57">Tail latency</h3>
+<div class="outline-text-3" id="text-org5e3fa57">
+<p>
+Latency at high end of the distribution
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1494cf2" class="outline-2">
+<h2 id="org1494cf2">Sharding</h2>
+<div class="outline-text-2" id="text-org1494cf2">
+<p>
+What if data does not fit in one machine? Splitting the dataset among multiple nodes is know as <i>sharding</i> or <i>paritioning</i> (not to be confused with network partition).
+</p>
+
+<p>
+How do we decide how to split the dataset among the shards? What makes a sharding strategy good?
+</p>
+
+<p>
+We would like to avoid hotspots, anddd threfore evenly distribute the load.
+</p>
+
+<dl class="org-dl">
+<dt>Partition by key range</dt><dd>One option is to partition by key. So if keys are string, then shards would be similar to a volume of an encyclopedia. Problem with this is that we end up with an uneven distribution of data (Unless you know it's going to be evenly distributed).</dd>
+
+<dt>Partition by hash of keys, mod N</dt><dd>An improved approach involves hashing the keys in order to evenly distribute the key set across machines. So the hashed values can be distributed using <code>mod N</code> function, where <code>N</code> is the number of machines. The problem with this approach is that if a machine goes down, or a new machine needs to be added, then the <code>N</code> changes, and many values will need to be moved to a different machine.</dd>
+</dl>
+
+<p>
+Ideally, if we had <code>K</code> keys and <code>N</code> nodes, then <code>K/N</code> would be the minimum movement possible, taking some keys out of the old machines and move them to the new one. 
+</p>
+
+<dl class="org-dl">
+<dt>Consistent hasing</dt><dd>Let's arrange the hashed key set around a ring, and let's assign machines to a partition of that ring. When a desicion has to happen, the key to be inserted will first be hashed to a value in the ring and the chosen machine will be the one closest, following the ring clockwise.</dd>
+</dl>
+
+<pre class="example">
+	     0
+	_.---+---._
+      .'           '. M1
+     /             8 \
+  M4| 50              |
+48  +                 +  16 
+    |                 | 
+     \            22 /
+      '. 38        .'
+      M3'-._____.-' M2
+	     +
+	     32
+
+M1 stores [50, 8)
+M2 stores [8, 22)
+M3 stores [22, 38)
+M4 stores [38, 50)
+
+</pre>
+
+<p>
+So in this example, if the key <code>k1</code> wants to be written, and let's say <code>hash(k1)=14</code>, it will be stored at machine <code>M2</code>
+</p>
+
+<p>
+Now let's say a new node needs to be added, and it's added at position 62. The keys that will have to be moved are 
+<code>[50, 62)</code>, from <code>M1</code> to the new node <code>M5</code>.
+</p>
+
+<p>
+In the case a node crash, its keys will have to be moved to the subsecuent node in the ring. This is why dynamo DB handles replication also using the ring, having a master node for a particular piece of data and choosing backups to the the following nodes in the ring.
+</p>
+
+<dl class="org-dl">
+<dt>Consistent hashing with virtual nodes</dt><dd>A drawback of the consistent hashing algorithm we just described is that the load might not be evenly distributed. This might now always be the case, and it should improve when more and more data is store. Having said this, an improvent would be to hash each machine to many different places in the ring, so that chances of even distribution of the load is higher.</dd>
+</dl>
+
+<pre class="example">
+	   M4   M3
+  M2  _.---+---._
+    .'           '. M1
+   /               \
+M4|                 |
+  +                 +  M2
+  |                 | 
+ M4\               / M1
+    '.           .'
+    M3'-._____.-' M2
+	M1    M3
+</pre>
+
+
+<p>
+By using virtual nodes, we can also decide how many virtual nodes each real machine should have, so that load can be sort of customized per machine. So in the case of machine M1 having more space than the rest, we can assign more virtual nodes to it.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd5d1787" class="outline-2">
+<h2 id="orgd5d1787">MapReduce</h2>
+<div class="outline-text-2" id="text-orgd5d1787">
+<p>
+A broad categorization of systems is
+</p>
+
+<dl class="org-dl">
+<dt>Online systems</dt><dd>Services, that wait for clients to make requests, and try to respond as quickly as possible. Low latency and availability is prioritized.</dd>
+
+<dt>Offline systems</dt><dd>Batch processing systems, where high throuput is often prioritized.</dd>
+</dl>
+
+<p>
+MapReduce comes to help this last group. <b>MapReduce</b> is a tool for computing <i>derived data</i>. Raw data is the authoritative version of data, the format new data comes in, while derived data is the result of taking this existing data and transforming it somehow.
+</p>
+</div>
+
+<div id="outline-container-org8ca00b3" class="outline-4">
+<h4 id="org8ca00b3">Example: Inverted index.</h4>
+<div class="outline-text-4" id="text-org8ca00b3">
+<p>
+We can use  MapReduce to compute inverted indexes, as the ones used on search engines. If we have
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">Document</th>
+<th scope="col" class="org-left">Words</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">The, quick, brown, fox, jumps, &#x2026;</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">The, dog, growls</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">My, dog,</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+And convert it into
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Word</th>
+<th scope="col" class="org-right">Document</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">The</td>
+<td class="org-right">1, 2</td>
+</tr>
+
+<tr>
+<td class="org-left">quick</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">brown</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">fox</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">jumps</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">dog</td>
+<td class="org-right">2, 3</td>
+</tr>
+
+<tr>
+<td class="org-left">growls</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-left">My</td>
+<td class="org-right">2</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>
+This computation can be divided into two phases, the <i>map</i> phase, that will convert
+</p>
+
+<p>
+(1, [The, quick, brown, fox, jumps]), (2, [The, dog, growls])
+</p>
+
+<p>
+into
+</p>
+
+<p>
+[(The, 1), (quick, 1), &#x2026;], [(The, 2), (dog, 2), &#x2026;], [(dog, 3), &#x2026;]
+</p>
+
+<p>
+And finally a <i>reduce</i> phase that will combine the list of pairs into the final form.
+</p>
+
+<p>
+But what is the ral challenge then? Well, if the input is huge, we might want to split the computation into several different machines, parallelizing it. MapReduce structure turns out to be convenient for paralellization.
+</p>
+
+<ol class="org-ol">
+<li><b>MAP</b>: The first phase, the map phase, is completely parallelizable. Each document can be processed by a different machine independently. The results will be stored in each machine local storage.</li>
+<li><b>SHUFFLE</b>: Then, we need to split the load to each reducer. The default way is to just <code>hash(key) mod N</code> where <code>N</code> is the number of reducers. The reduce will now need to read from each local storage to get the intermediate results.</li>
+<li><b>REDUCE</b>: The reducer will run and write the output to a distributed file system (GFS)</li>
+</ol>
+
+<p>
+Of course the only thing the programmer needs to care about is the functions provided to the map and reduce phases (and maybe shuffle if they want).
+</p>
+
+<pre class="example">
+map : (K,V) -&gt; [(K', V')]
+reduce : (K', [V']) -&gt; [V']
+</pre>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://www.youtube.com/playlist?list=PLNPUF5QyWU8PydLG2cIJrCvnn5I_exhYx">CSE138 - YouTube playlist</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://decomposition.al/blog/2019/04/26/an-example-run-of-the-chandy-lamport-snapshot-algorithm/">Lindsey Kuper's blog post on Chandy-Lamport algorithm</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://groups.csail.mit.edu/tds/papers/Lynch/jacm85.pdf">Impossibility of Distributed Consensus with One Faulty Process</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+Leslie Lamport. The part-time parliament. ACM Transactions on Computer Systems, 16(2):133–169, 1998.
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://courses.cs.vt.edu/~cs5204/fall08-kafura/Papers/FaultTolerance/Paxos-Simple-Lamport.pdf">Leslie Lamport. Paxos Made Simple. 2021.</a>
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: Eugenia Simich</p>
+<p class="date">Created: 2024-05-30 Thu 16:39</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
